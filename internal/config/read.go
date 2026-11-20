@@ -2,29 +2,33 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 )
 
 func Read() (Config, error) {
 	path, err := getConfigFilePath()
-
 	if err != nil {
 		return Config{}, err
 	}
-	fmt.Printf("The file path is %v\n", path)
+	stats, err := os.Stat(path)
+	if err != nil {
+		return Config{}, err
+	}
+
 	file, err := os.Open(path)
-	var data []byte
-	size, err := file.Read(data)
+	data := make([]byte, stats.Size())
+	_, err = file.Read(data)
+	if err = file.Close(); err != nil {
+		return Config{}, nil
+	}
+	var configuration Config
 
-	var config Config
+	if err = json.Unmarshal(data, &configuration); err != nil {
+		return Config{}, err
 
-	json.Unmarshal(data, &config)
-	fmt.Printf("Size of file: %v\n", size)
-	fmt.Printf("User name %v\n", config.current_user_name)
-	fmt.Printf("DB URL %v\n", config.db_url)
-	return config, nil
+	}
+	return configuration, nil
 }
 
 func getConfigFilePath() (string, error) {

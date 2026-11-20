@@ -2,13 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/dugedog/gator/internal/config"
 )
 
 func main() {
-	value, err := config.Read()
+	cfg, err := config.Read()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("The output of Read() is %v", value)
+	fmt.Printf("Read config: %+v\n", cfg)
+
+	err = cfg.SetUser("drexes")
+	if err != nil {
+		log.Fatalf("couldnt set current user: %v", err)
+	}
+
+	cfg, err = config.Read()
+	if err != nil {
+		log.Fatalf("error reading config: %v", err)
+		return
+	}
+
+	fmt.Printf("Read config again: %+v\n", cfg)
+
 }
